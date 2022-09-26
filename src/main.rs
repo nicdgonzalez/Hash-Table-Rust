@@ -1,5 +1,5 @@
 
-#[derive(Clone, Debug, Default)]
+#[derive(Debug, Clone, Default)]
 struct Bucket<Value> {
     key: String,
     value: Value,
@@ -16,50 +16,16 @@ impl<Value: Copy + Clone + Default> HashTable<Value> {
     /// Constructs an empty hash table.
     pub fn new() -> Self {
         return Self {
-            table: vec![Bucket::<Value>::default(); 16],
+            table: vec![Bucket::<Value>::default(); 17],
             count: 0,
         }
-    }
-
-    fn _hash(&mut self, key: &str) -> usize {
-        let mut hash: usize = 1;
-        for c in key.chars() {
-            hash *= 163;
-            hash += c as usize;
-        }
-        hash %= self.table.len() as usize;
-        return hash;
-    }
-
-    fn _is_prime(&mut self, value: usize) -> bool {
-        if value == 0 || value == 1 {
-            return false;
-        }
-        for i in 2..(value / 2) {
-            if value % i == 0 {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    fn _next_prime(&mut self, value: usize) -> usize {
-        let mut result: usize = value;
-        if result % 2 == 0 {
-            result += 1;
-        }
-        while !self._is_prime(result) {
-            result += 2;
-        }
-        return result;
     }
 
     /// Enters a key-value pair into the hash table.
     /// If the key already exists, the value is overwritten.
     pub fn insert(&mut self, key: &str, value: Value) -> () {
-        let hash: usize = self._hash(key);
+        let hash: usize = self.hash(key);
         let mut bucket: &mut Bucket<Value> = &mut self.table[hash];
-
         // Check if there is already a key in the bucket.
         if bucket.key != "" {
             // Check if the key already exists at the head of the linked list.
@@ -79,7 +45,7 @@ impl<Value: Copy + Clone + Default> HashTable<Value> {
                 }
             }
         }
-        // Either this bucket was empty or we made it to the end of
+        // Either the bucket was empty or we made it to the end of
         // the linked list. We can just add the key-value pair.
         bucket.key = key.to_string();
         bucket.value = value;
@@ -87,22 +53,60 @@ impl<Value: Copy + Clone + Default> HashTable<Value> {
         self.count += 1;
         // Check if the table is at 75% capacity.
         if self.count < (self.table.len() * (3 / 4)) {
+            // Table is not ready to resize yet.
             return;
         }
-        // TODO: Resize the table ((capacity * 2) + 1).
+        // TODO: Resize the table to ((capacity * 2) + 1).
         return;
     }
 
     /// Returns the value associated with the key,
     /// or ``None`` if the key is not present.
-    pub fn get(&mut self, key: &str) -> Option<&Value> {
+    #[allow(dead_code)]
+    pub fn get(&mut self, _key: &str) -> Option<&Value> {
         return None;
     }
 
-    /// Deletes a key from the table,
-    /// returning ``false`` if the key was not present.
-    pub fn remove(&mut self, key: &str) -> bool {
+    /// Deletes a key from the table, returning ``false``
+    /// if the key was not present.
+    #[allow(dead_code)]
+    pub fn remove(&mut self, _key: &str) -> bool {
         return false;
+    }
+
+    fn hash(&mut self, key: &str) -> usize {
+        let mut hash: usize = 1;
+        for c in key.chars() {
+            hash *= 163;
+            hash += c as usize;
+        }
+        hash %= self.table.len() as usize;
+        return hash;
+    }
+
+    #[allow(dead_code)]
+    fn is_prime(value: usize) -> bool {
+        if value == 0 || value == 1 {
+            return false;
+        }
+        for i in 2..(value / 2) {
+            if value % i == 0 {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    #[allow(dead_code)]
+    fn next_prime(value: usize) -> usize {
+        let mut result: usize = value;
+        if result % 2 == 0 {
+            result += 1;
+        }
+        while !Self::is_prime(result) {
+            result += 2;
+        }
+        return result;
     }
 }  // end impl HashTable
 
